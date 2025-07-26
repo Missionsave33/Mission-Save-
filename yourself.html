@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการออม</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    .section { margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f0f0f0; }
+    .back-btn { margin-top: 30px; padding: 10px 20px; }
+    .total-row { text-align: right; font-weight: bold; padding-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>ประวัติการออมของคุณ</h2>
+
+  <div class="section">
+    <h3>📌 ออมประจำ</h3>
+    <table id="fixedTable">
+      <thead>
+        <tr>
+          <th>ชื่อเป้าหมาย</th>
+          <th>จำนวนเงิน (บาท)</th>
+          <th>วันที่</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="total-row" id="fixedTotal"></p>
+  </div>
+
+  <div class="section">
+    <h3>🎯 ออมมีเป้าหมาย</h3>
+    <table id="goalTable">
+      <thead>
+        <tr>
+          <th>ชื่อเป้าหมาย</th>
+          <th>จำนวนที่ต้องเก็บต่อวัน (บาท)</th>
+          <th>ระยะเวลา (วัน)</th>
+          <th>วันที่เริ่ม</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="total-row" id="goalTotal"></p>
+  </div>
+
+  <button class="back-btn" onclick="goBack()">🔙 กลับหน้าออม</button>
+
+  <script>
+    const sheetURL = "https://sheetdb.io/api/v1/nlnc03ay4ibgj";
+    const currentUser = localStorage.getItem("username");
+
+    if (!currentUser) {
+      alert("กรุณาเข้าสู่ระบบก่อน");
+      window.location.href = "checkin.html";
+    }
+
+    fetch(`${sheetURL}?UserID=${currentUser}`)
+      .then(res => res.json())
+      .then(data => {
+        const fixedTable = document.getElementById("fixedTable").querySelector("tbody");
+        const goalTable = document.getElementById("goalTable").querySelector("tbody");
+        const fixedTotalText = document.getElementById("fixedTotal");
+        const goalTotalText = document.getElementById("goalTotal");
+
+        const fixedData = data.filter(d => d.ประเภท === "ออมประจำ");
+        const goalData = data.filter(d => d.ประเภท === "ออมมีเป้าหมาย");
+
+        let fixedTotal = 0;
+        if (fixedData.length === 0) {
+          fixedTable.innerHTML = `<tr><td colspan="3">ไม่มีข้อมูล</td></tr>`;
+        } else {
+          fixedData.forEach(row => {
+            const amount = parseFloat(row['จำนวนเงินที่ต้องการออมวันนี้'] || 0);
+            fixedTotal += amount;
+            fixedTable.innerHTML += `
+              <tr>
+                <td>${row['เป้าหมาย']}</td>
+                <td>${amount.toLocaleString()}</td>
+                <td>${row.Date || '-'}</td>
+              </tr>
+            `;
+          });
+          fixedTotalText.innerText = `รวมออมประจำ: ${fixedTotal.toLocaleString()} บาท`;
+        }
+
+        let goalTotal = 0;
+        if (goalData.length === 0) {
+          goalTable.innerHTML = `<tr><td colspan="4">ไม่มีข้อมูล</td></tr>`;
+        } else {
+          goalData.forEach(row => {
+            const amount = parseFloat(row['จำนวนเงินเก็บที่ต้องการ'] || 0);
+            goalTotal += amount;
+            goalTable.innerHTML += `
+              <tr>
+                <td>${row['เป้าหมาย']}</td>
+                <td>${parseFloat(row['ยอดที่ควรเก็บต่อวัน'] || 0).toLocaleString()}</td>
+                <td>${row['ระยะเวลาที่ต้องการเก็บ']}</td>
+                <td>${row.Date || '-'}</td>
+              </tr>
+            `;
+          });
+          goalTotalText.innerText = `รวมออมมีเป้าหมาย: ${goalTotal.toLocaleString()} บาท`;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการโหลดข้อมูล ❌");
+      });
+
+    function goBack() {
+      window.location.href = "self-saving.html"; // หรือชื่อไฟล์หน้าออมของคุณ
+    }
+  </script>
+
+</body>
+</html>

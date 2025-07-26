@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เข้าสู่ระบบ</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
+  <style>
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    html, body {
+      height: 100vh;
+    }
+
+    body {
+      background: #FFFDD0;
+      color: rgb(0, 0, 0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s, color 0.3s;
+      padding: 20px;
+    }
+
+    .wrapper {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .wrapper h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .input-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #f9f9f9;
+      color: rgb(0, 0, 0);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .input-box i {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #000000;
+      cursor: pointer;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background: #FFA500;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #f6c3cf;
+      text-decoration: none;
+    }
+
+    #message {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+
+    /* Theme styles */
+    body.theme1 { background: #c7edff; color: black; }
+    body.theme1 .wrapper { background: #b1e6ff; }
+    body.theme1 .input-box input { background: #c5edff; border: 1px solid #a1e3ff; }
+    body.theme1 .btn { background: #8ecef9; }
+    body.theme1 .register-link a { color: #175b93; }
+
+    body.theme2 { background: #b9fb9c; color: black; }
+    body.theme2 .wrapper { background: #d0fab9; }
+    body.theme2 .input-box input { background: #daffdc; border: 1px solid #7bf3ef; }
+    body.theme2 .btn { background: #99dd68; }
+    body.theme2 .register-link a { color: #328246; }
+
+    body.theme3 { background: #FCB8D9; color: black; }
+    body.theme3 .wrapper { background: #fda3cb; }
+    body.theme3 .input-box input { background: #fec5d7; border: 1px solid #ffe2ef; }
+    body.theme3 .btn { background: #ff85c2; }
+    body.theme3 .register-link a { color: #ff3892; }
+
+    body.theme4 { background: #faf7af; color: black; }
+    body.theme4 .wrapper { background: #fff587; }
+    body.theme4 .input-box input { background: #fffac0; border: 1px solid #fff199; }
+    body.theme4 .btn { background: #ffe74e; }
+    body.theme4 .register-link a { color: #ee9b0d; }
+
+    .theme-switcher {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    }
+    .theme-btn:hover { transform: scale(1.1); }
+    .theme1-btn { background: #aae4ed; }
+    .theme2-btn { background: #80e230; }
+    .theme3-btn { background: #FCB8D9; }
+    .theme4-btn { background: #ffec41; }
+  </style>
+</head>
+
+<body>
+  <div class="theme-switcher" aria-label="Theme switcher">
+    <button class="theme-btn theme1-btn" onclick="setTheme('theme1')"></button>
+    <button class="theme-btn theme2-btn" onclick="setTheme('theme2')"></button>
+    <button class="theme-btn theme3-btn" onclick="setTheme('theme3')"></button>
+    <button class="theme-btn theme4-btn" onclick="setTheme('theme4')"></button>
+  </div>
+
+  <div class="wrapper">
+    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+      <h1>เข้าสู่ระบบ</h1>
+
+      <div class="input-box">
+        <input type="text" id="UserID" placeholder="ไอดีผู้ใช้" required />
+        <i class="bx bxs-user"></i>
+      </div>
+
+      <div class="input-box">
+        <input type="password" id="Password" placeholder="รหัสผ่าน" required />
+        <i class="bx bxs-lock-alt" id="togglePassword" title="แสดง/ซ่อนรหัสผ่าน"></i>
+      </div>
+
+      <button type="submit" class="btn">เข้าสู่ระบบ</button>
+
+      <div class="register-link">
+        <p>ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
+      </div>
+
+      <p id="message"></p>
+    </form>
+  </div>
+
+  <script>
+    function setTheme(themeName) {
+      document.body.className = themeName;
+      localStorage.setItem("selectedTheme", themeName);
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem("selectedTheme");
+      if (savedTheme) setTheme(savedTheme);
+    };
+
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('Password');
+
+    togglePassword.addEventListener('click', function () {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('bxs-show');
+      this.classList.toggle('bxs-lock-alt');
+    });
+
+    async function login() {
+      const UserID = document.getElementById("UserID").value.trim();
+      const Password = document.getElementById("Password").value.trim();
+      const messageEl = document.getElementById("message");
+
+      if (!UserID || !Password) {
+        messageEl.style.color = "red";
+        messageEl.innerText = "กรุณากรอกข้อมูลให้ครบถ้วน";
+        return;
+      }
+
+      messageEl.style.color = "black";
+      messageEl.innerText = "🔄 กำลังตรวจสอบ...";
+
+      const url = "https://sheetdb.io/api/v1/m201tuwziwbwn/search?UserID=" + encodeURIComponent(UserID);
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.length === 0) {
+          messageEl.style.color = "red";
+          messageEl.innerText = "❌ ไม่พบผู้ใช้";
+          return;
+        }
+
+        const user = data[0];
+        if (user.Password === Password) {
+          messageEl.style.color = "green";
+          messageEl.innerText = "✅ เข้าสู่ระบบสำเร็จ!";
+          localStorage.setItem("username", user.UserID);
+
+          setTimeout(() => {
+            window.location.href = "calculator.html";
+          }, 1500);
+        } else {
+          messageEl.style.color = "red";
+          messageEl.innerText = "❌ รหัสผ่านไม่ถูกต้อง";
+        }
+
+      } catch (error) {
+        messageEl.style.color = "red";
+        messageEl.innerText = "⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ";
+        console.error("Login Error:", error);
+      }
+    }
+  </script>
+</body>
+</html>

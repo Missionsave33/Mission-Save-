@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ประวัติของคุณ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+    body {
+      font-family: 'Sarabun', sans-serif;
+      margin: 0; padding: 20px;
+      background-color: #f0f4ff;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+      color: #3f51b5;
+    }
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .tab-button {
+      background-color: #3f51b5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tab-button.active {
+      background-color: #303f9f;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    thead {
+      background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+      color: white;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #f9faff;
+    }
+    tbody tr:hover {
+      background-color: #e3e8ff;
+    }
+    #chartContainer {
+      max-width: 600px;
+      margin: 30px auto 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    }
+    .back-btn {
+      background-color: #dcdcdc;
+      padding: 8px 16px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: inline-block;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>ข้อมูลประวัติของคุณ</h1>
+
+<div class="tab-buttons">
+  <button class="tab-button active" onclick="switchTab('savingTab')">💰 ประวัติการออม</button>
+  <button class="tab-button" onclick="switchTab('interestTab')">📈 ประวัติการคำนวณ</button>
+</div>
+
+<!-- ประวัติการออม -->
+<div class="tab-content active" id="savingTab">
+  <button id="refreshBtn">🔄 โหลดข้อมูลใหม่</button>
+  <table>
+    <thead>
+      <tr>
+        <th>ประเภท</th>
+        <th>เป้าหมาย</th>
+        <th>ยอดเงินรวม (บาท)</th>
+        <th>ระยะเวลา (วัน)</th>
+        <th>อัพเดทล่าสุด</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody">
+      <tr><td colspan="5" id="noData">กำลังโหลดข้อมูล...</td></tr>
+    </tbody>
+  </table>
+  <div id="chartContainer" style="display:none;">
+    <canvas id="summaryChart"></canvas>
+  </div>
+</div>
+
+<!-- ประวัติการคำนวณดอกเบี้ย -->
+<div class="tab-content" id="interestTab">
+  <div class="back-btn" onclick="goBack()">← กลับ</div>
+  <h2>ประวัติการคำนวณดอกเบี้ย</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>จำนวนเงิน</th>
+        <th>ธนาคาร</th>
+        <th>ดอกเบี้ย</th>
+        <th>ระยะเวลา</th>
+        <th>วันที่</th>
+      </tr>
+    </thead>
+    <tbody id="historyTable"></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const savingSheetURL = "https://sheetdb.io/api/v1/nlnc03ay4ibgj";
+  const interestSheetURL = "https://sheetdb.io/api/v1/81umx6nj4pusk";
+  const currentUser = localStorage.getItem("username");
+  const tbody = document.getElementById("historyBody");
+  const noDataRow = document.getElementById("noData");
+  const chartContainer = document.getElementById("chartContainer");
+  const refreshBtn = document.getElementById("refreshBtn");
+  let chartInstance = null;
+
+  // ประวัติการออม
+  async function loadSavingData() {
+    tbody.innerHTML = `<tr><td colspan="5" id="noData">กำลังโหลดข้อมูล...</td></tr>`;
+    chartContainer.style.display = 'none';
+
+    try {
+      const res = await fetch(`${savingSheetURL}?UserID=${currentUser}`);
+      const data = await res.json();
+
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="5" id="noData">ไม่พบข้อมูลการออม</td></tr>`;
+        return;
+      }
+
+      const summary = {};
+      data.forEach(item => {
+        const key = item.ประเภท + '|' + item.เป้าหมาย;
+        if (!summary[key]) {
+          summary[key] = {
+            ประเภท: item.ประเภท,
+            เป้าหมาย: item.เป้าหมาย,
+            ยอดรวม: 0,
+            ระยะเวลา: item['ระยะเวลาที่ต้องการเก็บ'] || '-',
+            ล่าสุด: item.Date || '-'
+          };
+        }
+        summary[key].ยอดรวม += Number(item['จำนวนเงินเก็บที่ต้องการ']) || 0;
+        if (item.Date && item.Date > summary[key].ล่าสุด) {
+          summary[key].ล่าสุด = item.Date;
+        }
+      });
+
+      tbody.innerHTML = "";
+      Object.values(summary).forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.ประเภท}</td>
+            <td>${row.เป้าหมาย}</td>
+            <td>${row.ยอดรวม.toLocaleString()}</td>
+            <td>${row.ระยะเวลา}</td>
+            <td>${row.ล่าสุด}</td>
+          </tr>
+        `;
+      });
+
+      showChart(Object.values(summary));
+    } catch (error) {
+      tbody.innerHTML = `<tr><td colspan="5" id="noData">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+      console.error(error);
+    }
+  }
+
+  function showChart(data) {
+    chartContainer.style.display = 'block';
+    const labels = data.map(d => d.เป้าหมาย);
+    const amounts = data.map(d => d.ยอดรวม);
+
+    if (chartInstance) chartInstance.destroy();
+
+    const ctx = document.getElementById('summaryChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'ยอดเงินรวม (บาท)',
+          data: amounts,
+          backgroundColor: '#3f51b5',
+          borderRadius: 6,
+          barPercentage: 0.6,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.parsed.y.toLocaleString() + " บาท"
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ประวัติการคำนวณ
+  async function loadInterestHistory() {
+    const table = document.getElementById("historyTable");
+    try {
+      const res = await fetch(interestSheetURL);
+      const data = await res.json();
+      const filtered = data.filter(row => row.UserID === currentUser);
+      if (!filtered.length) {
+        table.innerHTML = `<tr><td colspan="5">ไม่พบข้อมูล</td></tr>`;
+        return;
+      }
+      filtered.reverse().forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row["จำนวนเงินที่ต้องการฝาก"] || "-"}</td>
+          <td>${row["ธนาคาร"] || "-"}</td>
+          <td>${row["ดอกเบี้ย"] || "-"}</td>
+          <td>${row["ระยะเวลาในการเก็บ"] || "-"}</td>
+          <td>${row["Date"] || "-"}</td>
+        `;
+        table.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+      table.innerHTML = `<tr><td colspan="5">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+    }
+  }
+
+  function switchTab(id) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function goBack() {
+    history.back();
+  }
+
+  refreshBtn.addEventListener("click", loadSavingData);
+
+  if (!currentUser) {
+    alert("กรุณาเข้าสู่ระบบก่อนดูประวัติ");
+    window.location.href = "checkin.html";
+  } else {
+    loadSavingData();
+    loadInterestHistory();
+  }
+</script>
+
+</body>
+</html>

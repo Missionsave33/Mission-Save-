@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ลงทะเบียน</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Prompt", sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background-color: #FFFDD0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      background: white;
+      padding: 25px 20px;
+      border-radius: 22px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.12);
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 14px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #ffffff;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e3aa45;
+    }
+
+    #message {
+      margin-top: 12px;
+      font-size: 15px;
+      color: red;
+      min-height: 20px;
+    }
+
+    .theme-switcher {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .theme1-btn { background: #aae4ed; }
+    .theme2-btn { background: #80e230; }
+    .theme3-btn { background: #FCB8D9; }
+    .theme4-btn { background: #ffec41; }
+
+    body.theme1 { background: #c7edff; }
+    body.theme1 .container { background: #b1e6ff; }
+
+    body.theme2 { background: #b9fb9c; }
+    body.theme2 .container { background: #d0fab9; }
+
+    body.theme3 { background: #FCB8D9; }
+    body.theme3 .container { background: #fda3cb; }
+
+    body.theme4 { background: #faf7af; }
+    body.theme4 .container { background: #fff587; }
+  </style>
+</head>
+
+<body>
+  <!-- ปุ่มเลือกธีม -->
+  <div class="theme-switcher" aria-label="Theme switcher">
+    <button class="theme-btn theme1-btn" onclick="setTheme('theme1')" title="ธีมฟ้า"></button>
+    <button class="theme-btn theme2-btn" onclick="setTheme('theme2')" title="ธีมเขียว"></button>
+    <button class="theme-btn theme3-btn" onclick="setTheme('theme3')" title="ธีมชมพู"></button>
+    <button class="theme-btn theme4-btn" onclick="setTheme('theme4')" title="ธีมเหลือง"></button>
+  </div>
+
+  <!-- กล่องลงทะเบียน -->
+  <div class="container">
+    <h2>ลงทะเบียน</h2>
+    <input type="text" id="username" placeholder="ชื่อผู้ใช้" autocomplete="off" />
+    <input type="text" id="userid" placeholder="ไอดีผู้ใช้" autocomplete="off" />
+    <input type="text" id="contact" placeholder="อีเมล หรือ เบอร์โทร" autocomplete="off" />
+    <input type="password" id="password" placeholder="รหัสผ่าน (8 ตัว)" autocomplete="new-password" />
+    <input type="password" id="confirm" placeholder="ยืนยันรหัสผ่าน" autocomplete="new-password" />
+    <button onclick="register()">ลงทะเบียน</button>
+    <div id="message" role="alert"></div>
+    <p>มีบัญชีอยู่แล้ว? <a href="index.html">เข้าสู่ระบบ</a></p>
+  </div>
+
+  <script>
+    // โหลดธีมที่เคยเลือกไว้
+    window.onload = function () {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) document.body.className = savedTheme;
+    };
+
+    function setTheme(theme) {
+      document.body.className = theme;
+      localStorage.setItem("theme", theme);
+    }
+
+    async function register() {
+      const username = document.getElementById("username").value.trim();
+      const userid = document.getElementById("userid").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm").value;
+      const message = document.getElementById("message");
+
+      // ตรวจสอบข้อมูล
+      if (!username || !userid || !contact || !password || !confirm) {
+        message.innerText = "กรุณากรอกข้อมูลให้ครบถ้วน";
+        return;
+      }
+
+      if (password.length < 8) {
+        message.innerText = "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร";
+        return;
+      }
+
+      if (password !== confirm) {
+        message.innerText = "รหัสผ่านไม่ตรงกัน";
+        return;
+      }
+
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const data = {
+        data: [{
+          UserID: userid,
+          Username: username,
+          EmailOrPhone: contact,
+          Password: password,
+          Date: today
+        }]
+      };
+
+      const sheetdbUrl = "https://sheetdb.io/api/v1/m201tuwziwbwn"; // ใส่ลิงก์ SheetDB ของคุณ
+
+      try {
+        const response = await fetch(sheetdbUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          message.style.color = "green";
+          message.innerText = "✅ ลงทะเบียนสำเร็จ กำลังเข้าสู่ระบบ...";
+          setTimeout(() => {
+            window.location.href = "calculator.html"; // ไปยังหน้าหลังลงทะเบียน
+          }, 1500);
+        } else {
+          message.innerText = "❌ ไม่สามารถลงทะเบียนได้";
+        }
+      } catch (error) {
+        console.error("Register error:", error);
+        message.innerText = "⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เลือกวิธีการออม</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    body {
+      background-color: #FFFDD0;
+      transition: background-color 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin-bottom: 25px;
+      color: #444;
+    }
+
+    .button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 250px;
+      margin: 15px auto;
+      padding: 15px 20px;
+      font-size: 18px;
+      background-color: #7F95E4;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    }
+
+    .button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .theme-switcher {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .theme1-btn { background: #aae4ed; }
+    .theme2-btn { background: #80e230; }
+    .theme3-btn { background: #FCB8D9; }
+    .theme4-btn { background: #ffec41; }
+
+    /* Theme styles */
+    body.theme1 { background-color: #c7edff; }
+    body.theme2 { background-color: #b9fb9c; }
+    body.theme3 { background-color: #FCB8D9; }
+    body.theme4 { background-color: #faf7af; }
+
+    body.theme1 .button { background-color: #8ecef9; color: black; }
+    body.theme2 .button { background-color: #99dd68; color: black; }
+    body.theme3 .button { background-color: #ff85c2; color: black; }
+    body.theme4 .button { background-color: #ffe74e; color: black; }
+
+  </style>
+</head>
+<body>
+  <h2>เลือกวิธีการออมเงินของคุณ 🌈</h2>
+
+  <!-- ✅ ลิงก์ไปยัง yourself.html -->
+  <button class="button" onclick="location.href='yourself.html'">
+    💰 ฝากด้วยตนเอง
+  </button>
+
+  <!-- ✅ ลิงก์ไปยัง bank.html -->
+  <button class="button" onclick="location.href='bank.html'">
+    🏦 ฝากในธนาคาร
+  </button>
+
+  <!-- ✅ ปุ่มเปลี่ยนธีม -->
+  <div class="theme-switcher" aria-label="Theme switcher">
+    <button class="theme-btn theme1-btn" aria-label="ธีมสีฟ้า" onclick="setTheme('theme1')"></button>
+    <button class="theme-btn theme2-btn" aria-label="ธีมสีเขียว" onclick="setTheme('theme2')"></button>
+    <button class="theme-btn theme3-btn" aria-label="ธีมสีชมพู" onclick="setTheme('theme3')"></button>
+    <button class="theme-btn theme4-btn" aria-label="ธีมสีเหลือง" onclick="setTheme('theme4')"></button>
+  </div>
+
+  <script>
+    function setTheme(theme) {
+      document.body.className = theme;
+    }
+  </script>
+</body>
+</html>
